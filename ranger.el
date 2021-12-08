@@ -311,6 +311,9 @@ preview window."
 (defvar ranger-buffer nil)
 (defvar ranger-frame nil)
 
+;; store the old cursor type
+(defvar ranger-cursor-type cursor-type)
+
 (defvar ranger-w-alist ()
   "List of windows using ranger.")
 
@@ -372,7 +375,8 @@ preview window."
                                   ranger-sort
                                   ranger-filter-files
                                   ranger-truncate
-                                  ranger-show-details
+                                  ;; ranger-show-details
+                                  ranger-hide-details
                                   ))
 
 ;; Masking and details
@@ -2581,7 +2585,7 @@ fraction of the total frame size"
       (message "File opened, exiting ranger")
       (ranger-disable)
       (find-file buffer-fn)
-      (setq-local cursor-type t)
+      (setq-local cursor-type ranger-cursor-type)
       (setq header-line-format ranger-pre-header-format)
       (when ranger-return-to-ranger
         (add-hook 'kill-buffer-hook 'ranger nil t)))
@@ -2959,8 +2963,9 @@ properly provides the modeline in dired mode. "
   (interactive)
   ;; don't kill ranger buffer if open somewhere else
   (if (> (length (get-buffer-window-list)) 1)
-      ((delete-window)
-       (delete-window ranger-preview-window))
+      (progn
+        (delete-window)
+        (delete-window ranger-preview-window))
     (ranger-revert)))
 
 (defun ranger-to-dired ()
