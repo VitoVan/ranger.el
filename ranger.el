@@ -165,7 +165,13 @@
     "mp4"
     "bin"
     "exe"
-    "msi")
+    "msi"
+    "xls"
+    "xlsx"
+    "doc"
+    "docx"
+    "ppt"
+    "pptx")
   "File extensions to not preview."
   :group 'ranger
   :type 'list)
@@ -379,6 +385,17 @@ preview window."
                                   ranger-hide-details
                                   ))
 
+;;
+
+(defun quicklook-preview (&optional arg)
+  "Quick look on MacOS"
+  (interactive "P")
+  (let ((cmd (format
+              "qlook %s"
+              (shell-quote-argument (dired-get-filename)))))
+    (shell-command cmd)
+    (message cmd)))
+
 ;; Masking and details
 
 (defun ranger-show-details ()
@@ -554,12 +571,15 @@ Selective hiding of specific attributes can be controlled by MASK."
     (define-key map "<"                'dired-prev-dirline)
 
     ;; preview windows
-    (define-key map "i"                'ranger-preview-toggle)
+    ;; (define-key map "i"                'ranger-preview-toggle)
     (define-key map (kbd "C-j")        'ranger-scroll-page-down)
     (define-key map (kbd "C-k")        'ranger-scroll-page-up)
     (define-key map "zp"               'ranger-toggle-details)
     ;; TODO map zc    toggle_option collapse_preview
-    (define-key map (kbd "SPC")        'ranger-toggle-literal)
+    (define-key map (kbd "SPC")        'quicklook-preview)
+    ;; (define-key map "zi"               'ranger-toggle-literal)
+    (define-key map "i"                'ranger-toggle-literal)
+
     (define-key map "zf"               'ranger-toggle-scale-images)
 
     ;; copy and paste
