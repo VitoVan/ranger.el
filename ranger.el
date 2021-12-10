@@ -511,6 +511,7 @@ Selective hiding of specific attributes can be controlled by MASK."
     (define-key map "D"                'dired-do-delete)
     (define-key map "R"                'dired-do-rename)
     (define-key map "+"                'mkdir)
+    (define-key map "T"                'touch)
     (define-key map "="                'dired-diff)
 
     ;; navigation
@@ -558,7 +559,7 @@ Selective hiding of specific attributes can be controlled by MASK."
     (define-key map (kbd "C-k")        'ranger-scroll-page-up)
     (define-key map "zp"               'ranger-toggle-details)
     ;; TODO map zc    toggle_option collapse_preview
-    (define-key map "zi"               'ranger-toggle-literal)
+    (define-key map (kbd "SPC")        'ranger-toggle-literal)
     (define-key map "zf"               'ranger-toggle-scale-images)
 
     ;; copy and paste
@@ -1647,6 +1648,8 @@ ranger-`CHAR'."
   "Find file in ranger buffer.  `ENTRY' can be used as path or filename, else will use
 currently selected file in ranger. `IGNORE-HISTORY' will not update history-ring on change"
   (interactive)
+  (unless ranger-show-literal
+    (ranger-toggle-literal))
   (let ((find-name (or entry
                        (dired-get-filename nil t)))
         (minimal (r--fget ranger-minimal))
@@ -2595,7 +2598,7 @@ fraction of the total frame size"
         (ranger)))
      ((not buffer-fn)
       (message "Ranger window was overwritten. Redirecting window to new frame")
-      (unless minimal
+      (unless t
         (set-window-buffer nil ranger-buffer)
         (when current
           (display-buffer-pop-up-frame current '(inhibit-switch-frame . nil)))))
@@ -2954,13 +2957,18 @@ properly provides the modeline in dired mode. "
 (defun ranger-close ()
   "Close tab or disable ranger"
   (interactive)
+  (unless ranger-show-literal
+    (ranger-toggle-literal))
   (if (> (length ranger-t-alist) 1)
       (ranger-close-tab)
-    (ranger-disable)))
+    (ranger-disable))
+  (ranger-still-dired))
 
 (defun ranger-disable ()
   "Interactively disable ranger-mode."
   (interactive)
+  (unless ranger-show-literal
+    (ranger-toggle-literal))
   ;; don't kill ranger buffer if open somewhere else
   (if (> (length (get-buffer-window-list)) 1)
       (progn
